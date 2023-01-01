@@ -1,0 +1,31 @@
+loadBalancerServices:
+  enabled: false
+  annotations: {
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  }
+
+# You can change it if you like
+antiAffinity: "hard"
+
+# Use only nodes with label=as-cluster-server
+labels:
+  role: as-cluster-server
+
+# Don't let other Pods to use this as-cluster-server nodes
+tolerations:
+  - key: "as-cluster-server"
+    operator: "Equal"
+    value: "1"
+    effect: "NoSchedule"
+
+# Add a disk with type ssd -> in real mapping a ssd storage class can map to GP2
+persistenceStorage:
+  - mountPath: /opt/aerospike/data
+    enabled: true
+    name: datadir
+    storageClass: ssd
+    accessMode: ReadWriteOnce
+    volumeMode: Filesystem
+    size: 1Gi
+
+volumes: [ ]
