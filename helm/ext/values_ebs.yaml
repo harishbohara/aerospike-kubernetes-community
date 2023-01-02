@@ -6,6 +6,7 @@ loadBalancerServices:
 
 # You can change it if you like
 antiAffinity: "hard"
+aerospikeNamespaceMemoryGB: 14
 
 # Use only nodes with label=as-cluster-server
 labels:
@@ -23,9 +24,9 @@ persistenceStorage:
   - mountPath: /opt/aerospike/data
     enabled: true
     name: datadir
-    storageClass: ssd
+    storageClass: gp3-delete
     accessMode: ReadWriteOnce
     volumeMode: Filesystem
-    size: 1Gi
+    size: 100Gi
 
 volumes: [ ]
