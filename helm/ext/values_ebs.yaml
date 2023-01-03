@@ -21,12 +21,19 @@ tolerations:
 
 # Add a disk with type ssd -> in real mapping a ssd storage class can map to GP2
 persistenceStorage:
-  - mountPath: /opt/aerospike/data
+#  - mountPath: /opt/aerospike/data
+  #    enabled: true
+  #    name: datadir
+  #    storageClass: gp3-delete
+  #    accessMode: ReadWriteOnce
+  #    volumeMode: Filesystem
+  #    size: 100Gi
+  - devicePath: /dev/sdb
     enabled: true
-    name: datadir
+    name: data-dev
     storageClass: gp3-delete
     accessMode: ReadWriteOnce
-    volumeMode: Filesystem
     size: 100Gi
+    volumeMode: Block
 
 volumes: [ ]
