@@ -7,6 +7,7 @@ loadBalancerServices:
 # You can change it if you like
 antiAffinity: "hard"
 aerospikeNamespaceMemoryGB: 14
+aerospikeReplicationFactor: 1
 
 # Use only nodes with label=as-cluster-server
 labels:

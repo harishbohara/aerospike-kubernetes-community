@@ -988,7 +988,7 @@ spec:
         - name: NAMESPACE
           value: "test"
         - name: REPL_FACTOR
-          value: "2"
+          value: "1"
         - name: MEM_GB
           value: "14"
         - name: DEFAULT_TTL
