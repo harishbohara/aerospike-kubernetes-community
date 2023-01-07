@@ -82,7 +82,7 @@ metadata:
 data:
   # default aerospike configuration file
   
-  aerospike.template.conf: "# Aerospike database configuration file.\n\n# This stanza must come first.\nservice {\n\tuser root\n\tgroup root\n\tpaxos-single-replica-limit 1 # Number of nodes where the replica count is automatically reduced to 1.\n\tpidfile /var/run/aerospike/asd.pid\n\tproto-fd-max 15000\n}\n\nlogging {\n\n\t# Log file must be an absolute path.\n\tfile ${LOGFILE} {\n\t\tcontext any info\n\t}\n\n\t# Send log messages to stdout\n\tconsole {\n\t\tcontext any info \n\t}\n}\n\n\nnetwork {\n\tservice {\n\t\taddress ${SERVICE_ADDRESS}\n\t\tport ${SERVICE_PORT}\n\n\t\t# Uncomment the following to set the `access-address` parameter to the\n\t\t# IP address of the Docker host. This will the allow the server to correctly\n\t\t# publish the address which applications and other nodes in the cluster to\n\t\t# use when addressing this node.\n\t\t# access-address <IPADDR>\n\t}\n\n\theartbeat {\n\n        address ${HB_ADDRESS}\n\t\t# mesh is used for environments that do not support multicast\n\t\tmode mesh\n\t\tport ${HB_PORT}\n\n\t\t# use asinfo -v 'tip:host=<ADDR>;port=3002' to inform cluster of\n\t\t# other mesh nodes\n\t\t# mesh-seed-placeholder\n\n\t\tinterval 150\n\t\ttimeout 10\n\t}\n\n\tfabric {\n\t    address ${FABRIC_ADDRESS}\n\t\tport ${FABRIC_PORT}\n\t}\n\n\tinfo {\n\t    address ${INFO_ADDRESS}\n\t\tport ${INFO_PORT}\n\t}\n}\n\nnamespace ${NAMESPACE} {\n\treplication-factor ${REPL_FACTOR}\n\tmemory-size ${MEM_GB}G\n\tdefault-ttl ${DEFAULT_TTL}\n\n#\tstorage-engine memory\n\n\t# To use file storage backing, comment out the line above and use the\n\t# following lines instead.\n\n\tstorage-engine device {\n\t\t# file /opt/aerospike/data/${MY_POD_NAME}-${NAMESPACE}.dat\n\t\t# filesize ${MEM_GB}G\n\t\tdevice /dev/sdb\n        write-block-size 128K\n\t\tdata-in-memory false # Store data in memory in addition to file.\n\t}\n}\n\n"
+  aerospike.template.conf: "# Aerospike database configuration file.\n\n# This stanza must come first.\nservice {\n\tuser root\n\tgroup root\n\tpaxos-single-replica-limit 1 # Number of nodes where the replica count is automatically reduced to 1.\n\tpidfile /var/run/aerospike/asd.pid\n\tproto-fd-max 15000\n}\n\nlogging {\n\n\t# Log file must be an absolute path.\n\tfile ${LOGFILE} {\n\t\tcontext any info\n\t}\n\n\t# Send log messages to stdout\n\tconsole {\n\t\tcontext any info \n\t}\n}\n\n\nnetwork {\n\tservice {\n\t\taddress ${SERVICE_ADDRESS}\n\t\tport ${SERVICE_PORT}\n\n\t\t# Uncomment the following to set the `access-address` parameter to the\n\t\t# IP address of the Docker host. This will the allow the server to correctly\n\t\t# publish the address which applications and other nodes in the cluster to\n\t\t# use when addressing this node.\n\t\t# access-address <IPADDR>\n\t}\n\n\theartbeat {\n\n        address ${HB_ADDRESS}\n\t\t# mesh is used for environments that do not support multicast\n\t\tmode mesh\n\t\tport ${HB_PORT}\n\n\t\t# use asinfo -v 'tip:host=<ADDR>;port=3002' to inform cluster of\n\t\t# other mesh nodes\n\t\t# mesh-seed-placeholder\n\n\t\tinterval 150\n\t\ttimeout 10\n\t}\n\n\tfabric {\n\t    address ${FABRIC_ADDRESS}\n\t\tport ${FABRIC_PORT}\n\t}\n\n\tinfo {\n\t    address ${INFO_ADDRESS}\n\t\tport ${INFO_PORT}\n\t}\n}\n\nnamespace ${NAMESPACE} {\n\treplication-factor ${REPL_FACTOR}\n\tmemory-size ${MEM_GB}G\n\tdefault-ttl ${DEFAULT_TTL}\n    nsup-period 60\n\n\n#\tstorage-engine memory\n\n\t# To use file storage backing, comment out the line above and use the\n\t# following lines instead.\n\n\tstorage-engine device {\n\t\t# file /opt/aerospike/data/${MY_POD_NAME}-${NAMESPACE}.dat\n\t\t# filesize ${MEM_GB}G\n\t\tdevice /dev/sdb\n        write-block-size 128K\n\t\tdata-in-memory false # Store data in memory in addition to file.\n\t}\n}\n\n"
   
 
   # old config for aerospike configuration file
@@ -689,6 +689,7 @@ metadata:
     release: prod
     app.kubernetes.io/component: grafana
     unique-app: prod-grafana
+    role: as-cluster-server
 spec:
   serviceName: prod-grafana
   replicas: 1
@@ -702,6 +703,11 @@ spec:
       annotations:
     spec:
       serviceAccountName: prod-aerospike
+      tolerations:
+        - effect: NoSchedule
+          key: as-cluster-server
+          operator: Equal
+          value: "1"
       terminationGracePeriodSeconds: 120
       initContainers:
       - name: "init-chmod-data"
@@ -805,6 +811,7 @@ metadata:
     release: prod
     app.kubernetes.io/component: prometheus
     unique-app: prod-prometheus
+    role: as-cluster-server
 spec:
   serviceName: prod-prometheus
   replicas: 2
@@ -821,6 +828,11 @@ spec:
       annotations:
     spec:
       serviceAccountName: prod-aerospike
+      tolerations:
+        - effect: NoSchedule
+          key: as-cluster-server
+          operator: Equal
+          value: "1"
       initContainers:
       - name: "init-chown-data"
         image: debian:9
@@ -992,7 +1004,7 @@ spec:
         - name: MEM_GB
           value: "14"
         - name: DEFAULT_TTL
-          value: "0"
+          value: "84600"
         - name: SERVICE_PORT
           value: "3000"
         - name: HB_PORT
@@ -1138,7 +1150,7 @@ spec:
         storageClassName: "gp3-delete"
         resources:
           requests:
-            storage: "100Gi"
+            storage: "300Gi"
 ---
 # Source: aerospike/templates/clusterrole.yaml
 # ------------------------------------------------------------------------------

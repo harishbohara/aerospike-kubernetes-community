@@ -8,6 +8,7 @@ loadBalancerServices:
 antiAffinity: "hard"
 aerospikeNamespaceMemoryGB: 14
 aerospikeReplicationFactor: 1
+aerospikeDefaultTTL: 84600
 
 # Use only nodes with label=as-cluster-server
 labels:
@@ -34,7 +35,26 @@ persistenceStorage:
     name: data-dev
     storageClass: gp3-delete
     accessMode: ReadWriteOnce
-    size: 100Gi
+    size: 300Gi
     volumeMode: Block
 
 volumes: [ ]
+
+
+prometheus:
+  labels:
+    role: as-cluster-server
+  tolerations:
+    - key: "as-cluster-server"
+      operator: "Equal"
+      value: "1"
+      effect: "NoSchedule"
+
+grafana:
+  labels:
+    role: as-cluster-server
+  tolerations:
+    - key: "as-cluster-server"
+      operator: "Equal"
+      value: "1"
+      effect: "NoSchedule"

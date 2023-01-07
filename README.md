@@ -18,6 +18,9 @@ kubectl apply -n aerospike -f setup/ssd.yaml
 ```shell
 sh build.sh
 
+# V-IMP: In my setup I have TTL of 1 day, Remove it before you build this.
+# aerospikeDefaultTTL: 84600 -> comment this line
+
 # Note the name of this cluster comes from "--name-template=prod" define in build.sh file. You can change this to have 
 # some other name  
 ```
